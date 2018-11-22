@@ -25,7 +25,7 @@ $ docker-compose down
 
 - load barancing
   - `http://localhost:8000`
-  - アクセスするたびにserver1とserver2に振り分けられて表示が変わります
+  - アクセスするたびにserver1とserver2に振り分けられて表示が変わります
 - web1 server
   - `http://localhost:8001`
   - このポートでは必ずserver1にアクセスされます
