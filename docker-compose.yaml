@@ -1,0 +1,24 @@
+version: '3.2'
+
+services:
+  loadbalancer:
+    container_name: "wg-loadbalancer"
+    image: nginx:alpine
+    volumes:
+      - ./loadbalancer:/etc/nginx/conf.d
+    ports:
+      - 8000:80
+  web1:
+    container_name: "wg-webserver1"
+    image: nginx:alpine
+    volumes:
+      - ./web1:/usr/share/nginx/html
+    ports:
+      - 8001:80
+  web2:
+    container_name: "wg-webserver2"
+    image: nginx:alpine
+    volumes:
+      - ./web2:/usr/share/nginx/html
+    ports:
+      - 8002:80
