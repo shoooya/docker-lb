@@ -2,8 +2,10 @@ version: '3.2'
 
 services:
   loadbalancer:
-    container_name: "loadbalancer"
+    container_name: loadbalancer
+    hostname: loadbalancer
     image: nginx:alpine
+    restart: always
     volumes:
       - ./loadbalancer:/etc/nginx/conf.d
     ports:
@@ -14,24 +16,36 @@ services:
       - web1
       - web2
   web1:
-    container_name: "web1"
+    container_name: web1
+    hostname: web1
     image: nginx:alpine
+    restart: always
+    volumes:
+      - ./web1:/etc/nginx/conf.d
     ports:
       - 8001:80
+    depends_on:
+      - app
     networks:
       - lb
   web2:
-    container_name: "web2"
+    container_name: web2
+    hostname: web2
     image: nginx:alpine
+    restart: always
+    volumes:
+      - ./web2:/etc/nginx/conf.d
     ports:
       - 8002:80
+    depends_on:
+      - app
     networks:
       - lb
-  phpfpm:
-    container_name: "phpfpm"
-    build: ./phpfpm/
-    volumes:
-      - ./src/sample:/var/www/sample
+  app:
+    container_name: app
+    hostname: app
+    build: ./app/
+    restart: always
     ports:
       - 9000:9000
     environment:
@@ -42,7 +56,7 @@ services:
     networks: 
       - lb
   db:
-    container_name: "db"
+    container_name: db
     image: mysql
     ports:
       - 8080:8080
