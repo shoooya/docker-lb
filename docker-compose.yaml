@@ -48,6 +48,10 @@ services:
     restart: always
     ports:
       - 9000:9000
+    volumes:
+      - ./app/src/example:/var/www/example
+    depends_on:
+      - db
     environment:
       - DB_HOST=db
       - DB_DATABASE=example
