@@ -4,5 +4,3 @@ RUN apk add icu-dev &&\
     docker-php-ext-install intl pdo_mysql
 RUN curl -s http://getcomposer.org/installer | php && \
     mv composer.phar /bin/composer
-COPY ./src/example /var/www/example
-RUN ash /var/www/example/setup.sh

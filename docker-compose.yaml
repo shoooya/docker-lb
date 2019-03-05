@@ -49,28 +49,56 @@ services:
     ports:
       - 9000:9000
     volumes:
-      - ./app/src/example:/var/www/example
+      - ./app/src/example:/var/www/example # ソースコードをlocalとコンテナで共有
+      - ./app/src/example/setup.sh:/docker-php-entorypoint/setup.sh # 初回起動時に走らせるスクリプトを設定
     depends_on:
-      - db
-    environment:
-      - DB_HOST=db
+      - slavedb
+    environment: # DB情報を環境変数にセット
+      - DB_HOST=masterdb
       - DB_DATABASE=example
       - DB_USERNAME=root
       - DB_PASSWORD=example
     networks: 
       - lb
-  db:
-    container_name: db
+  masterdb:
+    container_name: masterdb
     image: mysql
     ports:
-      - 8080:8080
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql #masterはvolumeをmount(永続化させる)
+      - ./masterdb/my.cnf:/etc/mysql/conf.d/my.cnf #master用のmy.cnfをコピー
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: example
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      TZ: "Asia/Tokyo"
+    networks:
+      - lb
+  slavedb:
+    container_name: slavedb
+    image: mysql
+    ports:
+      - 3307:3306
+    depends_on:
+      - masterdb #masterに依存させておく
+    tmpfs: /var/lib/mysql #tmpfsを使うと爆速・・・！メモリの空き容量とDBの容量と相談。
+    volumes:
+      - ./slavedb/my.cnf:/etc/mysql/conf.d/my.cnf #slave用のmy.cnfをコピー
+      - ./slavedb/start-slave.sh:/docker-entrypoint-initdb.d/start-slave.sh #初期化スクリプトをコピー
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: example
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      TZ: "Asia/Tokyo"
     networks:
       - lb
 
 networks:
   lb:
+
+volumes:
+  mysql-data:
+    driver: local
